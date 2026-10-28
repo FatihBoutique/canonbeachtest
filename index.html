@@ -18,6 +18,7 @@
 
 
   <style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:"Segoe UI",Arial,sans-serif;min-height:100vh;color:#fff;overflow-x:hidden;background:#061a13}
@@ -448,7 +449,7 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
 .memory-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .memory-placeholder{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(212,175,55,.65);border-radius:50%;color:#d4af37;background:rgba(255,255,255,.035)}
 .memory-placeholder svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.5;fill:none}
-.memory-name{display:block;margin-top:6px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(9px,.8vw,12px);font-weight:700;letter-spacing:.025em;line-height:1.2;color:#24412e;overflow-wrap:anywhere;transition:color .6s ease,text-shadow .6s ease}
+.memory-name{display:block;margin-top:6px;font-family:"Caveat",cursive;font-size:clamp(13px,1.05vw,18px);font-weight:600;letter-spacing:0;line-height:1.2;color:#24412e;overflow-wrap:anywhere;transition:color .6s ease,text-shadow .6s ease}
 /* All cards stay in the outer gutters, never in the countdown's central area. */
 .memory-polaroid[data-position="left-1"]{top:1%;left:1.2%}
 .memory-polaroid[data-position="left-2"]{top:13%;left:2.2%}
@@ -819,6 +820,23 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
  #memory-floaters .memory-polaroid[data-position="right-11"]{right:1%!important;top:72%!important}
  #memory-floaters .memory-polaroid[data-position="right-12"]{right:12%!important;top:79%!important}
  #memory-floaters .memory-polaroid[data-position="right-13"]{right:1%!important;top:86%!important}
+}
+
+
+
+/* REQUESTED UPDATE: click-to-zoom Polaroids and Caveat participant names */
+#memory-floaters .memory-polaroid.is-focused{
+  transform:translateY(-3px) rotate(0deg) scale(1.65)!important;
+  z-index:9999!important;
+}
+#memory-floaters .memory-polaroid.is-focused .memory-name{
+  font-family:"Caveat",cursive!important;
+  font-size:clamp(16px,1.35vw,22px)!important;
+}
+@media(max-width:700px){
+  #memory-floaters .memory-polaroid.is-focused{
+    transform:translateY(-3px) rotate(0deg) scale(1.45)!important;
+  }
 }
 
 </style>
@@ -2632,9 +2650,12 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
     startConfetti();
   }
 
+  let clickedFrame = null;
+
   function clearFocus() {
     window.clearTimeout(focusTimer);
     activeFrame = null;
+    clickedFrame = null;
     stage.classList.remove('has-focus');
     frames.forEach(frame => {
       frame.classList.remove('is-focused');
@@ -2651,35 +2672,45 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
       item.classList.toggle('is-focused', focused);
       item.setAttribute('aria-pressed', focused ? 'true' : 'false');
     });
-    // Keep the cinematic focus for at least 600 ms, then let it return smoothly.
     if (!persist) {
       focusTimer = window.setTimeout(() => {
-        if (activeFrame === frame) clearFocus();
+        if (activeFrame === frame && !clickedFrame) clearFocus();
       }, 600);
     }
   }
 
   frames.forEach(frame => {
     frame.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+      if (!clickedFrame && (event.pointerType === 'mouse' || event.pointerType === 'pen')) {
         focusFrame(frame, true);
         const r=frame.getBoundingClientRect(); burstAt(r.left+r.width/2,r.top+r.height/2,46,true);
       }
     });
     frame.addEventListener('pointerleave', event => {
-      if ((event.pointerType === 'mouse' || event.pointerType === 'pen') && activeFrame === frame) clearFocus();
+      if (!clickedFrame && (event.pointerType === 'mouse' || event.pointerType === 'pen') && activeFrame === frame) clearFocus();
     });
-    frame.addEventListener('focus', () => focusFrame(frame, true));
-    frame.addEventListener('blur', () => { if (activeFrame === frame) clearFocus(); });
+    frame.addEventListener('focus', () => {
+      if (!clickedFrame) focusFrame(frame, true);
+    });
+    frame.addEventListener('blur', () => {
+      if (!clickedFrame && activeFrame === frame) clearFocus();
+    });
     frame.addEventListener('pointerdown', event => {
-      focusFrame(frame);
       if(event.pointerType==='touch'){const r=frame.getBoundingClientRect();burstAt(r.left+r.width/2,r.top+r.height/2,38,true);}
     });
-    frame.addEventListener('click', () => focusFrame(frame));
+    frame.addEventListener('click', () => {
+      if (clickedFrame === frame) {
+        clearFocus();
+      } else {
+        clickedFrame = frame;
+        focusFrame(frame, true);
+        const r=frame.getBoundingClientRect();
+        burstAt(r.left+r.width/2,r.top+r.height/2,46,true);
+      }
+    });
     frame.addEventListener('pointercancel', clearFocus);
     frame.addEventListener('keydown', event => {
       if (event.key === 'Escape') clearFocus();
-      if (event.key === 'Enter' || event.key === ' ') focusFrame(frame);
     });
   });
 
