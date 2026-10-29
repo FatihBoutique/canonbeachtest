@@ -2884,8 +2884,8 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
 (() => {
   // Replace these two values with your Supabase project values. The anon key is public by design;
   // database and storage security are enforced by the SQL policies in supabase_setup.sql.
-  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_URL = 'https://gvezsgkopibacufkiiyx.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_JKEoFSrOpllsL79DbD_s6g_muoe9u8Q';
   const configured = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL) && !SUPABASE_ANON_KEY.startsWith('YOUR_');
   const supabase = configured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   const stage = document.getElementById('memory-floaters');
