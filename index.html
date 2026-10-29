@@ -867,6 +867,62 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
   }
 }
 
+
+/* ==========================================
+   PARTICIPANT MANAGER + VIP BADGE
+   Browser-local editor for names/photos/categories
+   ========================================== */
+.memory-vip-badge{
+  position:absolute;top:-8px;right:-9px;z-index:8;
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  min-width:42px;height:21px;padding:2px 7px;
+  border:1px solid rgba(255,255,255,.88);border-radius:999px;
+  background:linear-gradient(135deg,#f7e6a1,#c89b2c 55%,#8f6817);
+  color:#2a210e;font:700 10px/1 Arial,sans-serif;letter-spacing:.09em;
+  text-transform:uppercase;box-shadow:0 4px 10px rgba(0,0,0,.28),0 0 12px rgba(212,175,55,.35);
+  transform:rotate(4deg);pointer-events:none;
+}
+.memory-vip-badge::before{content:'✦';font-size:9px}
+.memory-polaroid.is-focused .memory-vip-badge{transform:rotate(0deg) scale(1.08);top:-10px;right:-11px}
+.participant-manager-trigger{
+  position:fixed;right:16px;bottom:16px;z-index:100001;
+  border:1px solid rgba(212,175,55,.7);border-radius:999px;
+  padding:9px 13px;background:rgba(7,27,19,.92);color:#f5e9b8;
+  font:600 12px/1 Arial,sans-serif;letter-spacing:.03em;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);backdrop-filter:blur(8px);
+}
+.participant-manager-trigger:hover{filter:brightness(1.12)}
+.participant-manager-backdrop{
+  position:fixed;inset:0;z-index:100002;display:none;
+  background:rgba(3,13,9,.72);backdrop-filter:blur(7px);padding:20px;overflow:auto;
+}
+.participant-manager-backdrop.is-open{display:flex;align-items:center;justify-content:center}
+.participant-manager{
+  width:min(960px,100%);max-height:min(90vh,900px);overflow:hidden;
+  border:1px solid rgba(212,175,55,.55);border-radius:18px;
+  background:linear-gradient(145deg,#fffdf5,#eee7d7);color:#173b2b;
+  box-shadow:0 30px 100px rgba(0,0,0,.55);font-family:Arial,sans-serif;
+}
+.participant-manager-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid rgba(36,65,46,.14)}
+.participant-manager-title{font-size:20px;font-weight:800}.participant-manager-sub{margin-top:4px;font-size:12px;opacity:.68}
+.participant-manager-close{border:0;background:transparent;color:#173b2b;font-size:28px;line-height:1;cursor:pointer}
+.participant-manager-toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px;border-bottom:1px solid rgba(36,65,46,.12)}
+.participant-manager-toolbar button{border:1px solid rgba(36,65,46,.2);border-radius:999px;padding:8px 12px;background:#fff;color:#173b2b;cursor:pointer;font-weight:700}
+.participant-manager-toolbar button.primary{background:#173b2b;color:#fff;border-color:#173b2b}
+.participant-manager-list{padding:14px 20px 20px;overflow:auto;max-height:calc(min(90vh,900px) - 154px)}
+.participant-row{display:grid;grid-template-columns:58px minmax(150px,1fr) 120px auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(36,65,46,.1)}
+.participant-row:last-child{border-bottom:0}
+.participant-thumb{width:58px;height:68px;border:1px solid rgba(212,175,55,.55);border-radius:4px;background:#f7f3e8;object-fit:cover;display:grid;place-items:center;overflow:hidden;color:#9b7b25}
+.participant-thumb img{width:100%;height:100%;object-fit:cover}
+.participant-fields{display:grid;grid-template-columns:1fr;gap:6px}.participant-fields input,.participant-fields select{width:100%;box-sizing:border-box;border:1px solid rgba(36,65,46,.18);border-radius:8px;padding:8px 9px;background:#fff;color:#173b2b;outline:none}
+.participant-fields input:focus,.participant-fields select:focus{border-color:#c89b2c;box-shadow:0 0 0 3px rgba(212,175,55,.13)}
+.participant-id{font-size:10px;opacity:.5}.participant-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.participant-actions button{border:1px solid rgba(36,65,46,.18);border-radius:8px;padding:7px 9px;background:#fff;color:#173b2b;cursor:pointer;font-size:11px;font-weight:700}.participant-actions button.danger{color:#8b2929}
+.participant-status{font-size:11px;opacity:.65;margin-left:auto}
+.participant-manager-note{padding:10px 20px;background:rgba(212,175,55,.09);font-size:11px;line-height:1.45;border-top:1px solid rgba(212,175,55,.16)}
+@media(max-width:650px){
+ .participant-manager-backdrop{padding:8px}.participant-manager{border-radius:14px}.participant-row{grid-template-columns:50px 1fr}.participant-thumb{width:50px;height:60px}.participant-actions{grid-column:2;justify-content:flex-start}.participant-manager-list{padding:10px 14px 18px}.participant-manager-head{padding:15px}.participant-manager-toolbar{padding:10px 14px}.participant-manager-trigger{right:10px;bottom:10px;font-size:11px;padding:8px 10px}
+}
+
 </style>
 
 </head>
@@ -2566,6 +2622,22 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
     <span class="memory-name">Participant 26</span>
   </button>
 </div>
+<button class="participant-manager-trigger" id="participantManagerOpen" type="button" aria-haspopup="dialog">⚙ Participants</button>
+<div class="participant-manager-backdrop" id="participantManagerBackdrop" aria-hidden="true">
+  <section class="participant-manager" role="dialog" aria-modal="true" aria-labelledby="participantManagerTitle">
+    <div class="participant-manager-head">
+      <div><div class="participant-manager-title" id="participantManagerTitle">Participants</div><div class="participant-manager-sub">Modifiez le nom, la photo ou la catégorie sans toucher au code.</div></div>
+      <button class="participant-manager-close" id="participantManagerClose" type="button" aria-label="Fermer">×</button>
+    </div>
+    <div class="participant-manager-toolbar">
+      <button class="primary" id="participantManagerSave" type="button">Enregistrer</button>
+      <button id="participantManagerReset" type="button">Réinitialiser les modifications</button>
+      <span class="participant-status" id="participantManagerStatus">Configuration du backend requise.</span>
+    </div>
+    <div class="participant-manager-list" id="participantManagerList"></div>
+    <div class="participant-manager-note"><strong>Accès sécurisé :</strong> seuls les comptes administrateurs autorisés peuvent enregistrer les modifications. La liste partagée est stockée dans Supabase ; configurez les clés et appliquez les règles SQL du guide avant publication.</div>
+  </section>
+</div>
 <script>
 (() => {
   const stage = document.getElementById('memory-floaters');
@@ -2806,5 +2878,112 @@ h1{animation:heroReveal 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center
   if (overlay) entranceObserver.observe(overlay, { attributes: true, attributeFilter: ['class', 'style'] });
 })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  // Replace these two values with your Supabase project values. The anon key is public by design;
+  // database and storage security are enforced by the SQL policies in supabase_setup.sql.
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const configured = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL) && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+  const supabase = configured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const stage = document.getElementById('memory-floaters');
+  const openBtn = document.getElementById('participantManagerOpen');
+  const backdrop = document.getElementById('participantManagerBackdrop');
+  const closeBtn = document.getElementById('participantManagerClose');
+  const list = document.getElementById('participantManagerList');
+  const saveBtn = document.getElementById('participantManagerSave');
+  const resetBtn = document.getElementById('participantManagerReset');
+  const status = document.getElementById('participantManagerStatus');
+  if (!stage || !openBtn || !backdrop || !list) return;
+
+  const frames = Array.from(stage.querySelectorAll('.memory-polaroid'));
+  const placeholder = () => `<span class="memory-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg></span>`;
+  const defaults = frames.map((frame, index) => {
+    const nameEl = frame.querySelector('.memory-name');
+    const img = frame.querySelector('.memory-photo img');
+    return { id:`participant-${String(index+1).padStart(2,'0')}`, name:(nameEl?.textContent || `Participant ${index+1}`).trim(), category:frame.dataset.category === 'vip' ? 'VIP' : 'Standard', photo:img ? img.getAttribute('src') : '' };
+  });
+  let participants = structuredClone(defaults);
+  let signedInUser = null;
+  const setStatus = (message) => { if(status) status.textContent = message; };
+
+  async function loadShared() {
+    if (!supabase) { setStatus('Configuration requise : renseignez les clés Supabase.'); return; }
+    try {
+      const { data, error } = await supabase.from('participants').select('id,name,category,photo_url,sort_order').order('sort_order');
+      if (error) throw error;
+      if (data?.length) {
+        const byId = new Map(data.map(row => [row.id,row]));
+        participants = defaults.map(base => { const row=byId.get(base.id); return row ? {...base,name:row.name,category:row.category,photo:row.photo_url || ''} : base; });
+        applyAll();
+      }
+      setStatus('Liste synchronisée en ligne.');
+    } catch (e) { console.error(e); setStatus('Impossible de charger la liste partagée.'); }
+  }
+
+  function applyParticipant(data,index) {
+    const frame=frames[index]; if(!frame)return;
+    frame.dataset.participantId=data.id; frame.dataset.category=data.category==='VIP'?'vip':'standard'; frame.setAttribute('aria-label',`Souvenir de ${data.name}`);
+    const nameEl=frame.querySelector('.memory-name'); if(nameEl) nameEl.textContent=data.name;
+    const photo=frame.querySelector('.memory-photo');
+    if(photo){ let img=photo.querySelector('img'); if(data.photo){ if(!img){img=document.createElement('img');photo.prepend(img);} img.src=data.photo;img.alt=data.name;const ph=photo.querySelector('.memory-placeholder');if(ph)ph.remove(); } else {if(img)img.remove();if(!photo.querySelector('.memory-placeholder'))photo.insertAdjacentHTML('beforeend',placeholder());} }
+    let badge=frame.querySelector('.memory-vip-badge');
+    if(data.category==='VIP'){if(!badge){badge=document.createElement('span');badge.className='memory-vip-badge';badge.textContent='VIP';frame.appendChild(badge);}badge.setAttribute('aria-label','Participant VIP');}else if(badge)badge.remove();
+  }
+  function applyAll(){participants.forEach((p,i)=>applyParticipant(p,i));}
+
+  function renderLogin(message='') {
+    list.innerHTML='';
+    const form=document.createElement('form'); form.style.cssText='padding:24px;display:grid;gap:12px;max-width:440px;margin:auto';
+    const heading=document.createElement('h3');heading.textContent='Connexion administrateur';heading.style.fontSize='18px';
+    const help=document.createElement('p');help.textContent='Connectez-vous avec le compte administrateur autorisé.';help.style.cssText='font-size:13px;line-height:1.5;opacity:.8';
+    const email=document.createElement('input');email.type='email';email.autocomplete='username';email.required=true;email.placeholder='Adresse e-mail';email.setAttribute('aria-label','Adresse e-mail');
+    const password=document.createElement('input');password.type='password';password.autocomplete='current-password';password.required=true;password.placeholder='Mot de passe';password.setAttribute('aria-label','Mot de passe');
+    [email,password].forEach(el=>el.style.cssText='width:100%;box-sizing:border-box;border:1px solid rgba(36,65,46,.2);border-radius:8px;padding:11px;background:white;color:#173b2b');
+    const submit=document.createElement('button');submit.type='submit';submit.className='primary';submit.textContent='Se connecter';submit.style.cssText='border:0;border-radius:8px;padding:12px;background:#173b2b;color:white;font-weight:800;cursor:pointer';
+    const note=document.createElement('p');note.textContent=message;note.style.cssText='font-size:12px;color:#8b2929';
+    form.append(heading,help,email,password,submit,note);form.addEventListener('submit',async e=>{e.preventDefault();if(!supabase){note.textContent='Ajoutez d’abord l’URL et la clé publique Supabase dans le fichier.';return;}submit.disabled=true;submit.textContent='Connexion…';const {data,error}=await supabase.auth.signInWithPassword({email:email.value.trim(),password:password.value});submit.disabled=false;submit.textContent='Se connecter';if(error){note.textContent='Connexion refusée. Vérifiez les identifiants et l’accès administrateur.';return;}const allowed=await verifyAdmin(data.user);if(!allowed){await supabase.auth.signOut();note.textContent='Ce compte n’a pas les droits administrateur.';return;}signedInUser=data.user;render();setStatus('Connecté — modifications autorisées.');});
+    list.appendChild(form); if(saveBtn)saveBtn.style.display='none';if(resetBtn)resetBtn.style.display='none';
+  }
+
+  function makeRow(data,index){
+    const row=document.createElement('div');row.className='participant-row';row.dataset.index=index;
+    const thumb=document.createElement('div');thumb.className='participant-thumb';if(data.photo){const img=document.createElement('img');img.src=data.photo;img.alt='';thumb.appendChild(img);}else thumb.innerHTML=placeholder();
+    const fields=document.createElement('div');fields.className='participant-fields';const id=document.createElement('div');id.className='participant-id';id.textContent=`${data.id} · ${frames[index]?.dataset.position||''}`;
+    const name=document.createElement('input');name.type='text';name.maxLength=100;name.value=data.name;name.placeholder='Nom du participant';name.setAttribute('aria-label',`Nom du participant ${index+1}`);
+    const category=document.createElement('select');category.innerHTML='<option value="Standard">Standard</option><option value="VIP">VIP</option>';category.value=data.category;fields.append(id,name,category);
+    const actions=document.createElement('div');actions.className='participant-actions';const photoBtn=document.createElement('button');photoBtn.type='button';photoBtn.textContent='📷 Photo';const clearBtn=document.createElement('button');clearBtn.type='button';clearBtn.textContent='✕';clearBtn.className='danger';clearBtn.title='Retirer la photo';const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp';input.hidden=true;
+    photoBtn.onclick=()=>input.click();input.onchange=()=>{const file=input.files?.[0];if(!file)return;if(file.size>8*1024*1024){setStatus('Photo trop lourde (maximum 8 Mo).');return;}compressImage(file).then(url=>{participants[index].photo=url;thumb.innerHTML='';const img=document.createElement('img');img.src=url;thumb.appendChild(img);setStatus('Photo modifiée — cliquez sur Enregistrer.');}).catch(()=>setStatus('Impossible de lire cette image.'));};
+    clearBtn.onclick=()=>{participants[index].photo='';thumb.innerHTML=placeholder();setStatus('Photo retirée — cliquez sur Enregistrer.');};name.oninput=()=>{participants[index].name=name.value.trim()||`Participant ${index+1}`;setStatus('Nom modifié — cliquez sur Enregistrer.');};category.onchange=()=>{participants[index].category=category.value;setStatus('Catégorie modifiée — cliquez sur Enregistrer.');};actions.append(photoBtn,clearBtn,input);row.append(thumb,fields,actions);return row;
+  }
+  async function verifyAdmin(user){if(!supabase||!user)return false;const {data,error}=await supabase.from('admins').select('user_id').eq('user_id',user.id).maybeSingle();return !error&&!!data;}
+  function render(){list.innerHTML='';participants.forEach((p,i)=>list.appendChild(makeRow(p,i)));if(saveBtn)saveBtn.style.display='';if(resetBtn)resetBtn.style.display='';if(!document.getElementById('participantManagerSignOut')){const signout=document.createElement('button');signout.id='participantManagerSignOut';signout.type='button';signout.textContent='Déconnexion';signout.onclick=async()=>{await supabase.auth.signOut();signedInUser=null;renderLogin('Vous êtes déconnecté.');setStatus('Session fermée.');};document.querySelector('.participant-manager-toolbar')?.appendChild(signout);}}
+  async function open(){backdrop.classList.add('is-open');backdrop.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';if(supabase){const {data}=await supabase.auth.getSession();signedInUser=data.session?.user||null;if(signedInUser&&!await verifyAdmin(signedInUser)){await supabase.auth.signOut();signedInUser=null;}}if(signedInUser)render();else renderLogin();}
+  function close(){backdrop.classList.remove('is-open');backdrop.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onload=()=>{const maxW=900,maxH=1100,scale=Math.min(1,maxW/img.width,maxH/img.height);const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',.8));};img.onerror=reject;img.src=reader.result;};reader.readAsDataURL(file);});}
+  async function photoForDatabase(item){
+    if(!item.photo?.startsWith('data:'))return item.photo||'';
+    const response=await fetch(item.photo);const blob=await response.blob();const path=`${item.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const {error}=await supabase.storage.from('participant-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;
+    const {data}=supabase.storage.from('participant-photos').getPublicUrl(path);return data.publicUrl;
+  }
+  async function saveShared(){
+    if(!supabase||!signedInUser){setStatus('Connexion administrateur requise.');return;}
+    saveBtn.disabled=true;setStatus('Enregistrement sécurisé en ligne…');
+    try{const rows=[];for(let i=0;i<participants.length;i++){const p=participants[i];rows.push({id:p.id,name:p.name.trim().slice(0,100)||`Participant ${i+1}`,category:p.category==='VIP'?'VIP':'Standard',photo_url:await photoForDatabase(p),sort_order:i});}
+      const {error}=await supabase.from('participants').upsert(rows,{onConflict:'id'});if(error)throw error;
+      participants=rows.map((r,i)=>({...defaults[i],name:r.name,category:r.category,photo:r.photo_url}));applyAll();render();setStatus('✓ Modifications publiées pour tous les visiteurs.');
+    }catch(e){console.error(e);setStatus('Échec de l’enregistrement. Vérifiez la configuration et les autorisations Supabase.');}finally{saveBtn.disabled=false;}
+  }
+  async function resetShared(){if(!supabase||!signedInUser)return;if(!confirm('Restaurer les valeurs originales pour tous les visiteurs ?'))return;resetBtn.disabled=true;try{const {error}=await supabase.from('participants').delete().neq('id','');if(error)throw error;participants=structuredClone(defaults);applyAll();render();setStatus('Valeurs originales restaurées pour tous les visiteurs.');}catch(e){console.error(e);setStatus('Réinitialisation impossible.');}finally{resetBtn.disabled=false;}}
+  openBtn.addEventListener('click',open);closeBtn.addEventListener('click',close);backdrop.addEventListener('click',e=>{if(e.target===backdrop)close();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&backdrop.classList.contains('is-open'))close();});
+  saveBtn.addEventListener('click',saveShared);resetBtn.addEventListener('click',resetShared);
+  if(!configured){setStatus('Backend non configuré — suivez le guide Supabase fourni.');}else{loadShared();}
+  applyAll();
+})();
+</script>
+
 </body>
 </html>
