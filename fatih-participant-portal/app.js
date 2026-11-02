@@ -29,7 +29,7 @@
       : supabaseClient.auth.signInWithPassword(payload);
   }
 
-   loadProfile() {
+   async function loadProfile() {
     // Check staff access first: existing admin/editor accounts do not need a participant row.
     const {data:adminRow,error:adminError}=await supabaseClient.from("admins").select("role").eq("user_id",currentUser.id).maybeSingle();
     if(adminError) throw adminError;
@@ -55,7 +55,7 @@
     await loadPosts();
   }
 
-   refreshSession() {
+   async function refreshSession() {
     const {data:{session}}=await supabaseClient.auth.getSession();
     if(!session) { currentUser=null; $("logoutBtn").classList.add("hidden"); showOnly("authView"); return; }
     currentUser=session.user;
@@ -107,7 +107,7 @@
     if(section==="manage") await loadParticipants();
   }));
 
-   loadAnnouncements() {
+   async function loadAnnouncements() {
     const list=$("announcementsList");
     const {data,error}=await supabaseClient.from("portal_announcements").select("*").order("created_at",{ascending:false});
     if(error) { list.innerHTML='<p class="muted">Unable to load announcements.</p>'; console.error(error); return; }
@@ -123,7 +123,6 @@
     e.currentTarget.reset(); toast("Announcement published."); await loadAnnouncements();
   });
 
-  async function loadPosts() {
     
 
 async function loadPosts() {
@@ -202,7 +201,6 @@ async function loadPosts() {
       } else {
         toast("Post deleted.");
         await loadPosts();
-      }
     })
   );
 }
