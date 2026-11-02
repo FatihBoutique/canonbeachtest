@@ -231,9 +231,10 @@ async function loadPosts() {
     message("Setup required: add your Supabase Project URL and anon/publishable key in config.js.");
     return;
   }
-  supabaseClient=window.supabase.createClient(
-    window.https://gvezsgkopibacufkiiyx.supabase.co,
-    window.sb_publishable_JKEoFSrOpllsL79DbD_s6g_muoe9u8Q
+    supabaseClient = window.supabase.createClient(
+    window.FATIH_SUPABASE_URL,
+    window.FATIH_SUPABASE_ANON_KEY
+  );
   );
   refreshSession();
   supabaseClient.auth.onAuthStateChange((_event,session)=>{
