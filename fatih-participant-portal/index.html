@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171512">
+  <title>FATIH BOUTIQUE | Participant Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="config.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="ambient"></div>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">FB</span><span>FATIH <small>BOUTIQUE</small></span></a>
+    <div class="top-actions">
+      <span class="event-tag">ROAD TO CANON BEACH · 07 NOV 2026</span>
+      <button id="logoutBtn" class="button button-outline hidden">Log out</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="authView" class="auth-layout">
+      <div class="intro">
+        <p class="eyebrow">A PRIVATE SPACE FOR CONFIRMED GUESTS</p>
+        <h1>Your excursion.<br><em>Your space.</em></h1>
+        <p class="intro-copy">Find official updates, connect with other participants and stay informed before excursion day.</p>
+        <div class="intro-points">
+          <span>✦ Official announcements</span><span>✦ Participant discussions</span><span>✦ Excursion-day coordination</span>
+        </div>
+      </div>
+      <div class="auth-card">
+        <div class="tabs">
+          <button class="tab active" data-tab="login">Sign in</button>
+          <button class="tab" data-tab="register">Create account</button>
+        </div>
+        <form id="loginForm" class="form">
+          <h2>Welcome back</h2>
+          <p class="muted">Use your registered email address or phone number.</p>
+          <label>Email or phone number<input id="loginIdentifier" autocomplete="username" placeholder="you@example.com or +243..." required></label>
+          <label>Password<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label>
+          <button class="button button-primary full" type="submit">Sign in <span>→</span></button>
+        </form>
+        <form id="registerForm" class="form hidden">
+          <h2>Join the participant space</h2>
+          <p class="muted">Creating an account does not automatically grant access. The organizer must confirm you.</p>
+          <label>Full name<input id="regName" autocomplete="name" placeholder="Your full name" required maxlength="100"></label>
+          <label>Unique username<input id="regUsername" autocomplete="nickname" placeholder="e.g. JeanD" required minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" title="Use 3–24 letters, numbers or underscores"></label>
+          <label>Email address <span class="optional">or</span> phone number<input id="regIdentifier" autocomplete="username" placeholder="Email or +243..." required></label>
+          <label>Password<input id="regPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required></label>
+          <button class="button button-primary full" type="submit">Create account <span>→</span></button>
+        </form>
+        <p id="authMessage" class="message" aria-live="polite"></p>
+        <p class="privacy-note"><span>🔒</span> Access is reserved for organizer-confirmed participants.</p>
+      </div>
+    </section>
+
+    <section id="pendingView" class="status-view hidden">
+      <div class="status-icon">⌛</div><p class="eyebrow">ACCOUNT CREATED</p>
+      <h1>Awaiting confirmation</h1>
+      <p>Your account is registered, but the organizer has not yet confirmed your participation. The private portal will unlock once your status is approved.</p>
+      <p class="muted">You can sign out and return later.</p>
+    </section>
+
+    <section id="suspendedView" class="status-view hidden">
+      <div class="status-icon">🔒</div><p class="eyebrow">PORTAL ACCESS</p>
+      <h1>Access unavailable</h1>
+      <p>Your participant access is currently suspended or your registration is no longer active. Please contact the organizer.</p>
+    </section>
+
+    <section id="portalView" class="hidden">
+      <div class="welcome-row">
+        <div><p class="eyebrow">PRIVATE PARTICIPANT SPACE</p><h1>Welcome, <span id="welcomeName">participant</span>.</h1><p class="muted">Your information hub for Road to Canon Beach.</p></div>
+        <div class="member-chip"><span class="online-dot"></span> Confirmed participant</div>
+      </div>
+      <nav class="portal-nav">
+        <button class="nav-item active" data-section="announcements">Announcements</button>
+        <button class="nav-item" data-section="forum">Forum</button>
+        <button class="nav-item admin-only hidden" data-section="manage">Manage participants</button>
+      </nav>
+      <section id="announcementsSection" class="portal-section">
+        <div class="section-heading"><div><p class="eyebrow">STAY INFORMED</p><h2>Official announcements</h2></div></div>
+        <form id="announcementForm" class="composer admin-only hidden">
+          <label>Publish an announcement<input id="announcementTitle" placeholder="Announcement title" required maxlength="140"></label>
+          <textarea id="announcementBody" placeholder="Write the information participants need..." required maxlength="8000"></textarea>
+          <div class="composer-footer"><span class="muted">Visible to confirmed participants</span><button class="button button-primary" type="submit">Publish update</button></div>
+        </form>
+        <div id="announcementsList" class="feed"><p class="muted">Loading announcements…</p></div>
+      </section>
+      <section id="forumSection" class="portal-section hidden">
+        <div class="section-heading"><div><p class="eyebrow">COMMUNITY</p><h2>Participant forum</h2><p class="muted">Share questions and useful information respectfully.</p></div></div>
+        <form id="postForm" class="composer">
+          <label>Start a discussion<textarea id="postBody" placeholder="What would you like to share with other participants?" required maxlength="4000"></textarea></label>
+          <div class="composer-footer"><span class="muted">Posting as <strong id="postingAs"></strong></span><button class="button button-primary" type="submit">Post message</button></div>
+        </form>
+        <div id="postsList" class="feed"><p class="muted">Loading discussions…</p></div>
+      </section>
+      <section id="manageSection" class="portal-section hidden">
+        <div class="section-heading"><div><p class="eyebrow">ORGANIZER TOOLS</p><h2>Participant management</h2><p class="muted">Approve or suspend access. Only administrators can change participant status.</p></div></div>
+        <div id="participantsList" class="feed"><p class="muted">Loading participants…</p></div>
+      </section>
+    </section>
+  </main>
+  <footer><span>FATIH BOUTIQUE</span><span>Private participant portal · 2026</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
