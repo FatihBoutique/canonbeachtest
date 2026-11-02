@@ -29,7 +29,7 @@
       : supabaseClient.auth.signInWithPassword(payload);
   }
 
-  async function loadProfile() {
+   loadProfile() {
     // Check staff access first: existing admin/editor accounts do not need a participant row.
     const {data:adminRow,error:adminError}=await supabaseClient.from("admins").select("role").eq("user_id",currentUser.id).maybeSingle();
     if(adminError) throw adminError;
@@ -55,7 +55,7 @@
     await loadPosts();
   }
 
-  async function refreshSession() {
+   refreshSession() {
     const {data:{session}}=await supabaseClient.auth.getSession();
     if(!session) { currentUser=null; $("logoutBtn").classList.add("hidden"); showOnly("authView"); return; }
     currentUser=session.user;
@@ -107,7 +107,7 @@
     if(section==="manage") await loadParticipants();
   }));
 
-  async function loadAnnouncements() {
+   loadAnnouncements() {
     const list=$("announcementsList");
     const {data,error}=await supabaseClient.from("portal_announcements").select("*").order("created_at",{ascending:false});
     if(error) { list.innerHTML='<p class="muted">Unable to load announcements.</p>'; console.error(error); return; }
@@ -125,8 +125,11 @@
 
   async function loadPosts() {
     
+
 async function loadPosts() {
   const list = $("postsList");
+
+  list.innerHTML = '<p class="muted">Loading discussions...</p>';
 
   const { data, error } = await supabaseClient
     .from("portal_forum_posts")
@@ -135,11 +138,10 @@ async function loadPosts() {
 
   if (error) {
     list.innerHTML = '<p class="muted">Unable to load discussions.</p>';
-    console.error(error);
+    console.error("Forum loading error:", error);
     return;
   }
 
-  // Retrieve usernames from the separate portal profiles table.
   const authorIds = [...new Set(
     (data || []).map(p => p.user_id).filter(Boolean)
   )];
@@ -155,7 +157,7 @@ async function loadPosts() {
 
     if (profileError) {
       list.innerHTML = '<p class="muted">Unable to load discussion authors.</p>';
-      console.error(profileError);
+      console.error("Forum author loading error:", profileError);
       return;
     }
 
@@ -166,24 +168,24 @@ async function loadPosts() {
 
   list.innerHTML = data.length
     ? data.map(p => `
-      <article class="feed-card">
-        <div class="feed-meta">
-          @${esc(usernameByUserId[p.user_id] || "participant")}
-          · ${fmt(p.created_at)}
-        </div>
-        <p>${esc(p.body)}</p>
-        ${
-          (p.user_id === currentUser.id || currentRole === "admin")
-            ? `<div class="post-actions">
-                 <button class="small-button danger"
-                   data-delete-post="${p.id}">
-                   Delete
-                 </button>
-               </div>`
-            : ""
-        }
-      </article>
-    `).join("")
+        <article class="feed-card">
+          <div class="feed-meta">
+            @${esc(usernameByUserId[p.user_id] || "participant")}
+            · ${fmt(p.created_at)}
+          </div>
+          <p>${esc(p.body)}</p>
+          ${
+            (p.user_id === currentUser.id || currentRole === "admin")
+              ? `<div class="post-actions">
+                   <button class="small-button danger"
+                     data-delete-post="${p.id}">
+                     Delete
+                   </button>
+                 </div>`
+              : ""
+          }
+        </article>
+      `).join("")
     : '<div class="feed-card"><p class="muted">No discussions yet. Start the conversation.</p></div>';
 
   list.querySelectorAll("[data-delete-post]").forEach(btn =>
@@ -199,13 +201,12 @@ async function loadPosts() {
         toast(error.message);
       } else {
         toast("Post deleted.");
-        loadPosts();
+        await loadPosts();
       }
     })
   );
 }
 
-  }
 
   $("postForm").addEventListener("submit",async e=>{
     e.preventDefault(); const body=$("postBody").value.trim(); if(!body)return;
