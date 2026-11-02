@@ -35,7 +35,7 @@
     if(adminError) throw adminError;
     currentRole=adminRow?.role || null;
 
-    const {data,error}=await supabaseClient.from("participants").select("*").eq("user_id",currentUser.id).maybeSingle();
+    const {data,error}=await supabaseClient.from("portal_participants").select("*").eq("user_id",currentUser.id).maybeSingle();
     if(error) throw error;
     currentProfile=data;
 
@@ -109,7 +109,7 @@
 
   async function loadAnnouncements() {
     const list=$("announcementsList");
-    const {data,error}=await supabaseClient.from("announcements").select("*").order("created_at",{ascending:false});
+    const {data,error}=await supabaseClient.from("portal_announcements").select("*").order("created_at",{ascending:false});
     if(error) { list.innerHTML='<p class="muted">Unable to load announcements.</p>'; console.error(error); return; }
     list.innerHTML=data.length ? data.map(a=>`<article class="feed-card"><span class="pill">Official update</span><h3>${esc(a.title)}</h3><div class="feed-meta">FATIH BOUTIQUE · ${fmt(a.created_at)}</div><p>${esc(a.body)}</p></article>`).join("") : '<div class="feed-card"><p class="muted">No announcements yet. Official updates will appear here.</p></div>';
   }
@@ -118,26 +118,98 @@
     e.preventDefault();
     if(!currentRole) return;
     const title=$("announcementTitle").value.trim(), body=$("announcementBody").value.trim();
-    const {error}=await supabaseClient.from("announcements").insert({title,body,created_by:currentUser.id});
+    const {error}=await supabaseClient.from("portal_announcements").insert({title,body,created_by:currentUser.id});
     if(error) { toast(error.message); return; }
     e.currentTarget.reset(); toast("Announcement published."); await loadAnnouncements();
   });
 
   async function loadPosts() {
-    const list=$("postsList");
-    const {data,error}=await supabaseClient.from("forum_posts").select("id,body,created_at,user_id,participants(username)").order("created_at",{ascending:false});
-    if(error) { list.innerHTML='<p class="muted">Unable to load discussions.</p>'; console.error(error); return; }
-    list.innerHTML=data.length ? data.map(p=>`<article class="feed-card"><div class="feed-meta">@${esc(p.participants?.username || "participant")} · ${fmt(p.created_at)}</div><p>${esc(p.body)}</p>${(p.user_id===currentUser.id || currentRole==="admin")?`<div class="post-actions"><button class="small-button danger" data-delete-post="${p.id}">Delete</button></div>`:""}</article>`).join("") : '<div class="feed-card"><p class="muted">No discussions yet. Start the conversation.</p></div>';
-    list.querySelectorAll("[data-delete-post]").forEach(btn=>btn.addEventListener("click",async()=>{
-      if(!confirm("Delete this discussion post?")) return;
-      const {error}=await supabaseClient.from("forum_posts").delete().eq("id",btn.dataset.deletePost);
-      if(error) toast(error.message); else {toast("Post deleted.");loadPosts();}
-    }));
+    
+async function loadPosts() {
+  const list = $("postsList");
+
+  const { data, error } = await supabaseClient
+    .from("portal_forum_posts")
+    .select("id,body,created_at,user_id")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = '<p class="muted">Unable to load discussions.</p>';
+    console.error(error);
+    return;
+  }
+
+  // Retrieve usernames from the separate portal profiles table.
+  const authorIds = [...new Set(
+    (data || []).map(p => p.user_id).filter(Boolean)
+  )];
+
+  let usernameByUserId = {};
+
+  if (authorIds.length) {
+    const { data: profiles, error: profileError } =
+      await supabaseClient
+        .from("portal_participants")
+        .select("user_id,username")
+        .in("user_id", authorIds);
+
+    if (profileError) {
+      list.innerHTML = '<p class="muted">Unable to load discussion authors.</p>';
+      console.error(profileError);
+      return;
+    }
+
+    usernameByUserId = Object.fromEntries(
+      (profiles || []).map(p => [p.user_id, p.username])
+    );
+  }
+
+  list.innerHTML = data.length
+    ? data.map(p => `
+      <article class="feed-card">
+        <div class="feed-meta">
+          @${esc(usernameByUserId[p.user_id] || "participant")}
+          · ${fmt(p.created_at)}
+        </div>
+        <p>${esc(p.body)}</p>
+        ${
+          (p.user_id === currentUser.id || currentRole === "admin")
+            ? `<div class="post-actions">
+                 <button class="small-button danger"
+                   data-delete-post="${p.id}">
+                   Delete
+                 </button>
+               </div>`
+            : ""
+        }
+      </article>
+    `).join("")
+    : '<div class="feed-card"><p class="muted">No discussions yet. Start the conversation.</p></div>';
+
+  list.querySelectorAll("[data-delete-post]").forEach(btn =>
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this discussion post?")) return;
+
+      const { error } = await supabaseClient
+        .from("portal_forum_posts")
+        .delete()
+        .eq("id", btn.dataset.deletePost);
+
+      if (error) {
+        toast(error.message);
+      } else {
+        toast("Post deleted.");
+        loadPosts();
+      }
+    })
+  );
+}
+
   }
 
   $("postForm").addEventListener("submit",async e=>{
     e.preventDefault(); const body=$("postBody").value.trim(); if(!body)return;
-    const {error}=await supabaseClient.from("forum_posts").insert({body,user_id:currentUser.id});
+    const {error}=await supabaseClient.from("portal_forum_posts").insert({body,user_id:currentUser.id});
     if(error) { toast(error.message); return; }
     $("postBody").value=""; toast("Your message has been posted."); await loadPosts();
   });
@@ -145,11 +217,11 @@
   async function loadParticipants() {
     const list=$("participantsList");
     if(currentRole!=="admin") return;
-    const {data,error}=await supabaseClient.from("participants").select("user_id,full_name,username,status,created_at").order("created_at",{ascending:false});
+    const {data,error}=await supabaseClient.from("portal_participants").select("user_id,full_name,username,status,created_at").order("created_at",{ascending:false});
     if(error) {list.innerHTML='<p class="muted">Unable to load participants. Check admin permissions.</p>';return;}
     list.innerHTML=data.length?data.map(p=>`<div class="participant-row"><div><div class="participant-name">${esc(p.full_name)} · @${esc(p.username)}</div><div class="participant-sub">${esc(p.user_id)} · Registered ${fmt(p.created_at)}</div><div class="status-label">Status: ${esc(p.status)}</div></div><div>${p.status!=="confirmed"?`<button class="small-button" data-status="${p.user_id}" data-value="confirmed">Approve</button>`:""}${p.status!=="suspended"?` <button class="small-button danger" data-status="${p.user_id}" data-value="suspended">Suspend</button>`:""}${p.status!=="pending"?` <button class="small-button" data-status="${p.user_id}" data-value="pending">Set pending</button>`:""}</div></div>`).join(""):'<p class="muted">No participant accounts yet.</p>';
     list.querySelectorAll("[data-status]").forEach(btn=>btn.addEventListener("click",async()=>{
-      const {error}=await supabaseClient.rpc("admin_set_participant_status",{target_user_id:btn.dataset.status,new_status:btn.dataset.value});
+      const {error}=await supabaseClient.rpc("admin_set_portal_participant_status",{target_user_id:btn.dataset.status,new_status:btn.dataset.value});
       if(error) toast(error.message); else {toast("Participant status updated.");loadParticipants();}
     }));
   }
