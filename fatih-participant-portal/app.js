@@ -226,19 +226,23 @@ async function loadPosts() {
     }));
   }
 
-  if(!configReady || !window.supabase) {
+ 
+  if (!configReady || !window.supabase) {
     showOnly("authView");
     message("Setup required: add your Supabase Project URL and anon/publishable key in config.js.");
     return;
   }
-    supabaseClient = window.supabase.createClient(
+
+  supabaseClient = window.supabase.createClient(
     window.FATIH_SUPABASE_URL,
     window.FATIH_SUPABASE_ANON_KEY
   );
-  );
+
   refreshSession();
-  supabaseClient.auth.onAuthStateChange((_event,session)=>{
-    currentUser=session?.user || null;
-    if(session) setTimeout(()=>refreshSession(),0);
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    if (session) setTimeout(() => refreshSession(), 0);
   });
 })();
+
