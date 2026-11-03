@@ -246,27 +246,5 @@ async function loadPosts() {
     currentUser = session?.user || null;
     if (session) setTimeout(() => refreshSession(), 0);
   });
-  // TEMPORARY TEST — Remove after verification
-window.testAdminFunction = async () => {
-  const { data, error } = await supabaseClient.functions.invoke(
-    "admin-create-participant",
-    { body: {} }
-  );
-
-  const status = error?.context?.status ?? 200;
-
-  let response = data;
-
-  if (error?.context) {
-    try {
-      response = await error.context.json();
-    } catch {
-      response = { message: error.message };
-    }
-  }
-
-  console.log("HTTP status:", status);
-  console.log("Function response:", response);
-};
 })();
 
