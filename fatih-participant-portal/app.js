@@ -187,6 +187,7 @@ async function loadPosts() {
       `).join("")
     : '<div class="feed-card"><p class="muted">No discussions yet. Start the conversation.</p></div>';
 
+ 
   list.querySelectorAll("[data-delete-post]").forEach(btn =>
     btn.addEventListener("click", async () => {
       if (!confirm("Delete this discussion post?")) return;
@@ -201,9 +202,11 @@ async function loadPosts() {
       } else {
         toast("Post deleted.");
         await loadPosts();
+      }
     })
   );
 }
+
 
 
   $("postForm").addEventListener("submit",async e=>{
