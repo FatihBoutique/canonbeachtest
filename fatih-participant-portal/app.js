@@ -56,7 +56,7 @@
   }
 
    async function refreshSession() {
-    const {data:{session}}=await supabaseClient.auth.getSession();
+    const {data:{session}}=await .getSession();
     if(!session) { currentUser=null; $("logoutBtn").classList.add("hidden"); showOnly("authView"); return; }
     currentUser=session.user;
     $("logoutBtn").classList.remove("hidden");
@@ -95,7 +95,7 @@
   });
 
   $("logoutBtn").addEventListener("click",async()=>{
-    await supabaseClient.auth.signOut(); currentUser=null; currentProfile=null; currentRole=null;
+    await .signOut(); currentUser=null; currentProfile=null; currentRole=null;
     $("logoutBtn").classList.add("hidden"); showOnly("authView"); switchTab("login");
   });
 
@@ -246,5 +246,27 @@ async function loadPosts() {
     currentUser = session?.user || null;
     if (session) setTimeout(() => refreshSession(), 0);
   });
+  // TEMPORARY TEST — Remove after verification
+window.testAdminFunction = async () => {
+  const { data, error } = await supabaseClient.functions.invoke(
+    "admin-create-participant",
+    { body: {} }
+  );
+
+  const status = error?.context?.status ?? 200;
+
+  let response = data;
+
+  if (error?.context) {
+    try {
+      response = await error.context.json();
+    } catch {
+      response = { message: error.message };
+    }
+  }
+
+  console.log("HTTP status:", status);
+  console.log("Function response:", response);
+};
 })();
 
