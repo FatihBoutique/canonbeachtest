@@ -56,7 +56,7 @@
   }
 
    async function refreshSession() {
-    const {data:{session}}=await .getSession();
+    const {data:{session}}=await supabaseClient.auth.getSession();
     if(!session) { currentUser=null; $("logoutBtn").classList.add("hidden"); showOnly("authView"); return; }
     currentUser=session.user;
     $("logoutBtn").classList.remove("hidden");
@@ -95,7 +95,7 @@
   });
 
   $("logoutBtn").addEventListener("click",async()=>{
-    await .signOut(); currentUser=null; currentProfile=null; currentRole=null;
+    await supabaseClient.auth.signOut(); currentUser=null; currentProfile=null; currentRole=null;
     $("logoutBtn").classList.add("hidden"); showOnly("authView"); switchTab("login");
   });
 
@@ -247,4 +247,3 @@ async function loadPosts() {
     if (session) setTimeout(() => refreshSession(), 0);
   });
 })();
-
