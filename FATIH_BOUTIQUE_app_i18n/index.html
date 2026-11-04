@@ -69,28 +69,37 @@
         <div><p class="eyebrow">PRIVATE PARTICIPANT SPACE</p><h1>Welcome, <span id="welcomeName">participant</span>.</h1><p class="muted">Your information hub for Road to Canon Beach.</p></div>
         <div class="member-chip"><span class="online-dot"></span> Confirmed participant</div>
       </div>
-      <nav class="portal-nav">
-        <button class="nav-item active" data-section="announcements">Announcements</button>
-        <button class="nav-item" data-section="forum">Forum</button>
-        <button class="nav-item admin-only hidden" data-section="manage">Manage participants</button>
+      <nav class="portal-nav" aria-label="Portal navigation">
+        <button class="nav-item active" data-section="dashboard" type="button">Community dashboard</button>
+        <button class="nav-item admin-only hidden" data-section="manage" type="button">Manage participants</button>
       </nav>
-      <section id="announcementsSection" class="portal-section">
-        <div class="section-heading"><div><p class="eyebrow">STAY INFORMED</p><h2>Official announcements</h2></div></div>
-        <form id="announcementForm" class="composer admin-only hidden">
-          <label>Publish an announcement<input id="announcementTitle" placeholder="Announcement title" required maxlength="140"></label>
-          <textarea id="announcementBody" placeholder="Write the information participants need..." required maxlength="8000"></textarea>
-          <div class="composer-footer"><span class="muted">Visible to confirmed participants</span><button class="button button-primary" type="submit">Publish update</button></div>
-        </form>
-        <div id="announcementsList" class="feed"><p class="muted">Loading announcements…</p></div>
-      </section>
-      <section id="forumSection" class="portal-section hidden">
-        <div class="section-heading"><div><p class="eyebrow">COMMUNITY</p><h2>Participant forum</h2><p class="muted">Share questions and useful information respectfully.</p></div></div>
-        <form id="postForm" class="composer">
-          <label>Start a discussion<textarea id="postBody" placeholder="What would you like to share with other participants?" required maxlength="4000"></textarea></label>
-          <div class="composer-footer"><span class="muted">Posting as <strong id="postingAs"></strong></span><button class="button button-primary" type="submit">Post message</button></div>
-        </form>
-        <div id="postsList" class="feed"><p class="muted">Loading discussions…</p></div>
-      </section>
+      <div id="dashboardSection" class="community-dashboard">
+        <section id="forumSection" class="portal-section chat-panel" aria-label="Participant chat">
+          <div class="section-heading chat-heading"><div><p class="eyebrow">COMMUNITY</p><h2>Participant chat</h2><p class="muted">A private conversation for confirmed guests.</p></div></div>
+          <div id="postsList" class="chat-messages" role="log" aria-label="Chat messages"><p class="muted">Loading messages…</p></div>
+          <form id="postForm" class="chat-composer">
+            <label class="sr-only" for="postBody">Write a message</label>
+            <textarea id="postBody" placeholder="Write a message…" required maxlength="4000" rows="2"></textarea>
+            <div class="chat-composer-footer"><span class="muted">Posting as <strong id="postingAs"></strong></span><button class="button button-primary" type="submit">Send →</button></div>
+          </form>
+        </section>
+        <section id="announcementsSection" class="portal-section announcements-panel" aria-label="Official announcements">
+          <div class="announcements-toggle-wrap">
+            <button id="announcementsToggle" class="announcements-toggle" type="button" aria-expanded="false" aria-controls="announcementsContent">
+              <span><span class="eyebrow">STAY INFORMED</span><strong>Official announcements</strong><small id="announcementPreview">Organizer updates and important information</small></span>
+              <span class="announcements-chevron" aria-hidden="true">⌄</span>
+            </button>
+          </div>
+          <div id="announcementsContent" class="announcements-content">
+            <form id="announcementForm" class="composer admin-only hidden">
+              <label>Publish an announcement<input id="announcementTitle" placeholder="Announcement title" required maxlength="140"></label>
+              <textarea id="announcementBody" placeholder="Write the information participants need..." required maxlength="8000"></textarea>
+              <div class="composer-footer"><span class="muted">Visible to confirmed participants</span><button class="button button-primary" type="submit">Publish update</button></div>
+            </form>
+            <div id="announcementsList" class="feed announcements-feed"><p class="muted">Loading announcements…</p></div>
+          </div>
+        </section>
+      </div>
       <section id="manageSection" class="portal-section hidden">
         <div class="section-heading"><div><p class="eyebrow">ORGANIZER TOOLS</p><h2>Participant management</h2><p class="muted">Approve or suspend access. Only administrators can change participant status.</p></div></div>
         <button id="toggleCreateParticipant" class="button button-primary create-participant-toggle" type="button" aria-expanded="false" aria-controls="createParticipantPanel">+ Create Participant</button>
