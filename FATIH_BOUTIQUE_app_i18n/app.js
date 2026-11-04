@@ -145,9 +145,9 @@ async function loadPosts() {
   if (authorIds.length) {
     const { data: profiles, error: profileError } =
       await supabaseClient
-        .from("portal_participants")
-        .select("user_id,username")
-        .in("user_id", authorIds);
+        
+.rpc("get_portal_forum_profiles");
+
 
     if (profileError) {
       list.innerHTML = '<p class="muted">Unable to load discussion authors.</p>';
